@@ -6,6 +6,7 @@ export default function Index() {
   const [modalVisible, setModalVisible] = useState(false);
   const [name, setName] = useState(''); // Track user input for name
   const [course, setCourse] = useState(''); // Track user input for course
+  const [isConfirmed, setIsConfirmed] = useState(false); // To track if confirmation is done
 
   const handleProceed = () => {
     setModalVisible(true);  // Show the modal when the button is pressed
@@ -15,13 +16,13 @@ export default function Index() {
     // Check if name and course are defined before proceeding
     if (name && course) {
       console.log("Proceeding with the action");
+      setIsConfirmed(true);  // Set confirmation state to true
       Toast.show({
         type: 'success',
         position: 'bottom',
-        text1: `NAME: ${name}`,
-        text2: `Course: ${course}`,
+        text1: 'Successful',
         visibilityTime: 3000, // Toast duration
-      });  // Show toast with name and course
+      });  // Show success toast
       setModalVisible(false);  // Close the modal after confirmation
     } else {
       console.log("Please enter both name and course");
@@ -62,6 +63,14 @@ export default function Index() {
         title="Proceed"
         onPress={handleProceed}
       />
+
+      {/* Display Name and Course after confirmation */}
+      {isConfirmed && (
+        <View style={styles.confirmationText}>
+          <Text>You are {name}</Text>
+          <Text>Your Course is {course}</Text>
+        </View>
+      )}
 
       {/* Modal for confirmation */}
       <Modal
@@ -135,5 +144,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 16,
+  },
+  confirmationText: {
+    marginTop: 20,
+    alignItems: "center",
   },
 });
