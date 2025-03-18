@@ -1,97 +1,116 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Image, Modal, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { Text, View, StyleSheet, TextInput, Button, Modal, TouchableOpacity } from "react-native";
+import Toast from 'react-native-toast-message'; // Import Toast
 
 export default function Index() {
-  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPath, setSelectedPath] = useState(null);
+  const [name, setName] = useState(''); // Track user input for name
+  const [course, setCourse] = useState(''); // Track user input for course
 
-  const openModal = (path) => {
-    setSelectedPath(path);
-    setModalVisible(true);
+  const handleProceed = () => {
+    setModalVisible(true);  // Show the modal when the button is pressed
   };
 
   const handleConfirm = () => {
-    if (selectedPath) {
-      setModalVisible(false);
-      router.push(selectedPath);
+    // Check if name and course are defined before proceeding
+    if (name && course) {
+      console.log("Proceeding with the action");
+      Toast.show({
+        type: 'success',
+        position: 'bottom',
+        text1: `NAME: ${name}`,
+        text2: `Course: ${course}`,
+        visibilityTime: 3000, // Toast duration
+      });  // Show toast with name and course
+      setModalVisible(false);  // Close the modal after confirmation
+    } else {
+      console.log("Please enter both name and course");
+      Toast.show({
+        type: 'error',
+        position: 'bottom',
+        text1: 'Error',
+        text2: 'Please enter both name and course',
+        visibilityTime: 3000, // Toast duration
+      });  // Show error toast
     }
+  };
+
+  const handleCancel = () => {
+    console.log("Action cancelled");
+    setModalVisible(false);  // Close the modal when the action is cancelled
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require("../assets/images/rodin.jpg")} style={styles.image} />
-      <Text style={styles.title}>Hi! I am Rhodjien Caratao, and these are my friends.</Text>
+      <Text>Name:</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder="Enter your name"
+        value={name}
+        onChangeText={(text) => setName(text)}  // Update the name state
+      />
 
-      {[
-        { name: "Alvin Paquibot", path: "/alvin" },
-        { name: "Shaira Mae Ma-asin", path: "/shaira" },
-        { name: "Harley Dave Chavez", path: "/harley" },
-        { name: "Angel Khyla Marie Aboloc", path: "/angel" },
-        { name: "Rolino Ongco", path: "/rolino" },
-        { name: "Clien Cyrus Taneo", path: "/clien" },
-      ].map((friend, index) => (
-        <TouchableOpacity key={index} onPress={() => openModal(friend.path)}>
-          <Text style={styles.link}>{index + 1}. {friend.name}</Text>
-        </TouchableOpacity>
-      ))}
+      <Text>Course:</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder="Enter your course"
+        value={course}
+        onChangeText={(text) => setCourse(text)}  // Update the course state
+      />
 
-      {/* Modal for Confirmation */}
+      <Button 
+        title="Proceed"
+        onPress={handleProceed}
+      />
+
+      {/* Modal for confirmation */}
       <Modal
-        animationType="none" // Instant appearance
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={handleCancel}
       >
-        <View style={styles.modalContainer}>
+        <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Do you wish to proceed?</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.button, styles.cancelButton]}>
+            <Text style={styles.modalText}>Do you want to proceed with the action?</Text>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleCancel}>
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleConfirm} style={[styles.button, styles.okButton]}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleConfirm}>
                 <Text style={styles.buttonText}>OK</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+
+      {/* Toast container for displaying messages */}
+      <Toast ref={(ref) => Toast.setRef(ref)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: "center",
+    gap: 10,
+    padding: 20,
+  },
+  input: {
+    width: "80%",
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 10,
+    borderRadius: 5,
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20,
-  },
-  image: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  link: {
-    fontSize: 16,
-    color: "blue",
-    textDecorationLine: "underline",
-    marginVertical: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
   },
   modalContent: {
     width: 300,
@@ -102,30 +121,19 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 20,
   },
-  modalButtons: {
+  buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    gap: 20,
   },
-  button: {
-    flex: 1,
-    paddingVertical: 10,
-    marginHorizontal: 5,
+  modalButton: {
+    backgroundColor: "#007BFF",
+    padding: 10,
     borderRadius: 5,
-    alignItems: "center",
-  },
-  cancelButton: {
-    backgroundColor: "red",
-  },
-  okButton: {
-    backgroundColor: "green",
   },
   buttonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "bold",
   },
 });
